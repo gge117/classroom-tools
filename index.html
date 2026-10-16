@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우리반 교실도구함</title>
+<style>
+  :root {
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #9ca3af;
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --border: #e5e7eb;
+    --picked-bg: #d1d5db;
+    --picked-text: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    text-align: center;
+    padding: 24px 16px 8px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+  nav.tabs {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px;
+  }
+  .tab-btn {
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 8px 16px 40px;
+  }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .coming-soon {
+    text-align: center;
+    padding: 80px 16px;
+    color: var(--muted);
+    font-size: 1.5rem;
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px dashed var(--border);
+  }
+
+  /* 발표자 뽑기 */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .controls label { font-size: 1.1rem; }
+  .controls input[type="number"] {
+    width: 90px;
+    padding: 8px;
+    font-size: 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-align: center;
+  }
+  .btn {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:disabled { background: #a5a5c5; cursor: not-allowed; }
+  .btn.secondary {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .display {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 32px 16px;
+    margin-bottom: 24px;
+    text-align: center;
+    border: 1px solid var(--border);
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .display .label {
+    font-size: 1.2rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .display .big-number {
+    font-size: 8rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .display .big-number.spinning { color: #f59e0b; }
+  .display .big-number.final { color: #10b981; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 12px;
+  }
+  .card {
+    background: var(--card);
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    border-radius: 14px;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4rem;
+    font-weight: 800;
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
+  }
+  .card.picked {
+    background: var(--picked-bg);
+    color: var(--picked-text);
+    border-color: var(--picked-bg);
+  }
+  .card.highlight {
+    background: #10b981;
+    color: #fff;
+    border-color: #10b981;
+    transform: scale(1.05);
+  }
+  .status {
+    text-align: center;
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 1rem;
+  }
+  .reset-row {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  /* 모둠 나누기 */
+  .info-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 1rem;
+    color: var(--muted);
+  }
+  .notice {
+    text-align: center;
+    min-height: 28px;
+    margin-bottom: 16px;
+    color: #dc2626;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .group-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .group-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  .group-members {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  .member-chip {
+    min-width: 52px;
+    height: 52px;
+    padding: 0 8px;
+    border-radius: 12px;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: 800;
+  }
+  .group-count {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+
+  /* 타이머 */
+  .presets {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .presets .btn { min-width: 100px; }
+  .timer-display {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px 16px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .timer-time {
+    font-size: clamp(6rem, 26vw, 20rem);
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-time.warn { color: #dc2626; }
+  .timer-msg {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: #dc2626;
+    min-height: 3rem;
+    margin-top: 8px;
+  }
+  .timer-display.done {
+    animation: flash 1s ease-in-out infinite;
+  }
+  @keyframes flash {
+    50% { background: #fee2e2; }
+  }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.5rem; }
+    .display .big-number { font-size: 5rem; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+    .card { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>우리반 교실도구함</h1>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" data-tab="picker">발표자뽑기</button>
+  <button class="tab-btn" data-tab="groups">모둠나누기</button>
+  <button class="tab-btn" data-tab="timer">타이머</button>
+</nav>
+
+<main>
+
+  <!-- 발표자 뽑기 -->
+  <section class="panel active" id="panel-picker">
+    <div class="controls">
+      <label for="studentCount">학생 수</label>
+      <input type="number" id="studentCount" min="1" max="99" value="25">
+      <button class="btn secondary" id="applyCount">번호 만들기</button>
+    </div>
+
+    <div class="display">
+      <div class="label" id="displayLabel">뽑기 버튼을 눌러주세요</div>
+      <div class="big-number" id="bigNumber">-</div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="drawBtn">뽑기</button>
+      <button class="btn secondary" id="resetBtn">처음부터 다시 시작</button>
+    </div>
+
+    <div class="grid" id="cardGrid"></div>
+    <div class="status" id="statusText"></div>
+  </section>
+
+  <!-- 모둠 나누기 -->
+  <section class="panel" id="panel-groups">
+    <div class="controls">
+      <span class="info-chip" id="groupStudentInfo">학생 수 25명</span>
+      <label for="groupCount">모둠 수</label>
+      <input type="number" id="groupCount" min="1" value="4">
+      <button class="btn" id="groupDivideBtn">나누기</button>
+      <button class="btn secondary" id="groupReshuffleBtn" disabled>다시 섞기</button>
+    </div>
+    <div class="notice" id="groupNotice"></div>
+    <div class="group-grid" id="groupGrid"></div>
+  </section>
+
+  <!-- 타이머 -->
+  <section class="panel" id="panel-timer">
+    <div class="presets">
+      <button class="btn secondary preset-btn" data-min="1">1분</button>
+      <button class="btn secondary preset-btn" data-min="3">3분</button>
+      <button class="btn secondary preset-btn" data-min="5">5분</button>
+    </div>
+    <div class="controls">
+      <label for="timerMin">직접 입력</label>
+      <input type="number" id="timerMin" min="0" max="180" value="5">
+      <span>분</span>
+      <input type="number" id="timerSec" min="0" max="59" value="0">
+      <span>초</span>
+      <button class="btn secondary" id="timerApply">적용</button>
+    </div>
+    <div class="notice" id="timerNotice"></div>
+
+    <div class="timer-display" id="timerDisplay">
+      <div class="timer-time" id="timerTime">05:00</div>
+      <div class="timer-msg" id="timerMsg"></div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" id="timerStart">시작</button>
+      <button class="btn secondary" id="timerPause" disabled>멈춤</button>
+      <button class="btn secondary" id="timerResume" disabled>다시 시작</button>
+      <button class="btn secondary" id="timerReset">초기화</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  // ---- 탭 전환 ----
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.panel');
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabButtons.forEach(b => b.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---- 발표자 뽑기 ----
+  const countInput = document.getElementById('studentCount');
+  const applyBtn = document.getElementById('applyCount');
+  const drawBtn = document.getElementById('drawBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const cardGrid = document.getElementById('cardGrid');
+  const bigNumber = document.getElementById('bigNumber');
+  const displayLabel = document.getElementById('displayLabel');
+  const statusText = document.getElementById('statusText');
+
+  let total = 25;
+  let picked = new Set();   // 이미 뽑힌 번호
+  let spinning = false;
+
+  function buildCards() {
+    cardGrid.innerHTML = '';
+    for (let i = 1; i <= total; i++) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.dataset.num = i;
+      card.textContent = i;
+      if (picked.has(i)) card.classList.add('picked');
+      cardGrid.appendChild(card);
+    }
+    updateStatus();
+  }
+
+  function updateStatus() {
+    const remain = total - picked.size;
+    statusText.textContent = `남은 번호 ${remain}개 / 전체 ${total}명`;
+    drawBtn.disabled = remain === 0 || spinning;
+  }
+
+  function getCard(n) {
+    return cardGrid.querySelector(`.card[data-num="${n}"]`);
+  }
+
+  function clearHighlight() {
+    cardGrid.querySelectorAll('.card.highlight').forEach(c => c.classList.remove('highlight'));
+  }
+
+  applyBtn.addEventListener('click', () => {
+    if (spinning) return;
+    let v = parseInt(countInput.value, 10);
+    if (isNaN(v) || v < 1) v = 1;
+    if (v > 99) v = 99;
+    countInput.value = v;
+    total = v;
+    picked = new Set();
+    bigNumber.textContent = '-';
+    bigNumber.className = 'big-number';
+    displayLabel.textContent = '뽑기 버튼을 눌러주세요';
+    buildCards();
+  });
+
+  drawBtn.addEventListener('click', () => {
+    const remaining = [];
+    for (let i = 1; i <= total; i++) {
+      if (!picked.has(i)) remaining.push(i);
+    }
+    if (remaining.length === 0 || spinning) return;
+
+    spinning = true;
+    drawBtn.disabled = true;
+    applyBtn.disabled = true;
+    resetBtn.disabled = true;
+    displayLabel.textContent = '뽑는 중...';
+    bigNumber.className = 'big-number spinning';
+
+    // 최종 당첨 번호를 미리 결정
+    const winner = remaining[Math.floor(Math.random() * remaining.length)];
+
+    // 룰렛 효과: 빠르게 번호 바꾸기 → 점점 느려지기
+    const duration = 2600;
+    const start = performance.now();
+    let delay = 40;
+    let lastTick = start;
+    let flashing = null;
+
+    function tick(now) {
+      const elapsed = now - start;
+      if (elapsed >= duration) {
+        finish();
+        return;
+      }
+      if (now - lastTick >= delay) {
+        const pick = remaining[Math.floor(Math.random() * remaining.length)];
+        showTemp(pick);
+        lastTick = now;
+        // 점점 느려지도록
+        const progress = elapsed / duration;
+        delay = 40 + progress * progress * 260;
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function showTemp(n) {
+      bigNumber.textContent = n;
+      clearHighlight();
+      const c = getCard(n);
+      if (c) c.classList.add('highlight');
+    }
+
+    function finish() {
+      clearHighlight();
+      bigNumber.textContent = winner;
+      bigNumber.className = 'big-number final';
+      displayLabel.textContent = '이번 발표자 번호';
+      const c = getCard(winner);
+      if (c) {
+        c.classList.add('highlight');
+        setTimeout(() => {
+          c.classList.remove('highlight');
+          c.classList.add('picked');
+        }, 900);
+      }
+      picked.add(winner);
+      spinning = false;
+      applyBtn.disabled = false;
+      resetBtn.disabled = false;
+      setTimeout(updateStatus, 900);
+    }
+
+    requestAnimationFrame(tick);
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (spinning) return;
+    picked = new Set();
+    bigNumber.textContent = '-';
+    bigNumber.className = 'big-number';
+    displayLabel.textContent = '뽑기 버튼을 눌러주세요';
+    buildCards();
+  });
+
+  buildCards();
+
+  // ---- 모둠 나누기 ----
+  const groupCountInput = document.getElementById('groupCount');
+  const groupDivideBtn = document.getElementById('groupDivideBtn');
+  const groupReshuffleBtn = document.getElementById('groupReshuffleBtn');
+  const groupGrid = document.getElementById('groupGrid');
+  const groupNotice = document.getElementById('groupNotice');
+  const groupStudentInfo = document.getElementById('groupStudentInfo');
+  let lastGroupCount = 0;
+
+  function updateGroupInfo() {
+    groupStudentInfo.textContent = `학생 수 ${total}명`;
+  }
+
+  function showNotice(msg) {
+    groupNotice.textContent = msg;
+  }
+
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function clearGroups() {
+    groupGrid.innerHTML = '';
+    lastGroupCount = 0;
+    groupReshuffleBtn.disabled = true;
+  }
+
+  // 모둠 수 검사: 올바르면 숫자, 아니면 null (안내 메시지 표시)
+  function validateGroupCount(value) {
+    const n = parseInt(value, 10);
+    if (isNaN(n) || n < 1) {
+      showNotice('모둠 수는 1 이상의 숫자로 입력해 주세요.');
+      return null;
+    }
+    if (n > total) {
+      showNotice(`모둠 수는 학생 수(${total}명)보다 많을 수 없습니다.`);
+      return null;
+    }
+    return n;
+  }
+
+  function renderGroups(groupCount) {
+    const students = [];
+    for (let i = 1; i <= total; i++) students.push(i);
+    const shuffled = shuffleArray(students);
+
+    const base = Math.floor(total / groupCount);
+    const extra = total % groupCount;   // 앞 모둠부터 한 명씩 더 배정
+
+    groupGrid.innerHTML = '';
+    let idx = 0;
+    for (let g = 0; g < groupCount; g++) {
+      const size = base + (g < extra ? 1 : 0);
+      const members = shuffled.slice(idx, idx + size).sort((a, b) => a - b);
+      idx += size;
+
+      const card = document.createElement('div');
+      card.className = 'group-card';
+
+      const title = document.createElement('div');
+      title.className = 'group-title';
+      title.textContent = `${g + 1}모둠`;
+      card.appendChild(title);
+
+      const memberBox = document.createElement('div');
+      memberBox.className = 'group-members';
+      members.forEach(num => {
+        const chip = document.createElement('div');
+        chip.className = 'member-chip';
+        chip.textContent = num;
+        memberBox.appendChild(chip);
+      });
+      card.appendChild(memberBox);
+
+      const count = document.createElement('div');
+      count.className = 'group-count';
+      count.textContent = `${members.length}명`;
+      card.appendChild(count);
+
+      groupGrid.appendChild(card);
+    }
+  }
+
+  groupDivideBtn.addEventListener('click', () => {
+    updateGroupInfo();
+    const n = validateGroupCount(groupCountInput.value);
+    if (n === null) {
+      clearGroups();
+      return;
+    }
+    showNotice('');
+    lastGroupCount = n;
+    renderGroups(n);
+    groupReshuffleBtn.disabled = false;
+  });
+
+  groupReshuffleBtn.addEventListener('click', () => {
+    updateGroupInfo();
+    if (lastGroupCount === 0) return;
+    const n = validateGroupCount(lastGroupCount);
+    if (n === null) {
+      clearGroups();
+      return;
+    }
+    showNotice('');
+    renderGroups(n);
+  });
+
+  groupCountInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') groupDivideBtn.click();
+  });
+
+  // 모둠 탭을 열 때 현재 학생 수 표시를 갱신
+  document.querySelector('.tab-btn[data-tab="groups"]').addEventListener('click', updateGroupInfo);
+
+  // ---- 타이머 ----
+  const timerTime = document.getElementById('timerTime');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const timerMsg = document.getElementById('timerMsg');
+  const timerNotice = document.getElementById('timerNotice');
+  const timerMinInput = document.getElementById('timerMin');
+  const timerSecInput = document.getElementById('timerSec');
+  const timerStartBtn = document.getElementById('timerStart');
+  const timerPauseBtn = document.getElementById('timerPause');
+  const timerResumeBtn = document.getElementById('timerResume');
+  const timerResetBtn = document.getElementById('timerReset');
+  const presetBtns = document.querySelectorAll('.preset-btn');
+
+  let timerSetMs = 5 * 60 * 1000;   // 설정된 전체 시간
+  let timerRemainMs = timerSetMs;   // 남은 시간
+  let timerEndAt = 0;               // 진행 중일 때 끝나는 시각 (Date.now 기준)
+  let timerState = 'idle';          // idle | running | paused | done
+  let timerIntervalId = null;
+  let audioCtx = null;
+
+  function formatTime(ms) {
+    const sec = Math.ceil(ms / 1000);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+
+  function renderTimer() {
+    timerTime.textContent = formatTime(timerRemainMs);
+    const isWarn = timerState !== 'idle' && timerRemainMs <= 10000;
+    timerTime.classList.toggle('warn', isWarn);
+    timerMsg.textContent = timerState === 'done' ? '시간 끝!' : '';
+    timerStartBtn.disabled = !(timerState === 'idle' || timerState === 'done');
+    timerPauseBtn.disabled = timerState !== 'running';
+    timerResumeBtn.disabled = timerState !== 'paused';
+  }
+
+  function startTicking() {
+    stopTicking();
+    timerIntervalId = setInterval(tickTimer, 200);
+  }
+
+  function stopTicking() {
+    if (timerIntervalId !== null) {
+      clearInterval(timerIntervalId);
+      timerIntervalId = null;
+    }
+  }
+
+  function tickTimer() {
+    if (timerState !== 'running') return;
+    timerRemainMs = Math.max(0, timerEndAt - Date.now());
+    if (timerRemainMs <= 0) {
+      finishTimer();
+      return;
+    }
+    renderTimer();
+  }
+
+  // 사용자 클릭 시점에 오디오를 준비해야 나중에 알림음이 재생됨
+  function unlockAudio() {
+    try {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) audioCtx = new Ctx();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) { /* 소리를 지원하지 않는 환경이면 무시 */ }
+  }
+
+  function playAlarm() {
+    if (!audioCtx) return;
+    for (let i = 0; i < 5; i++) {
+      const t = audioCtx.currentTime + i * 0.6;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = 880;
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.3, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t);
+      osc.stop(t + 0.45);
+    }
+  }
+
+  function startTimer() {
+    if (timerState !== 'idle' && timerState !== 'done') return;
+    timerNotice.textContent = '';
+    timerDisplay.classList.remove('done');
+    timerRemainMs = timerSetMs;
+    timerEndAt = Date.now() + timerRemainMs;
+    timerState = 'running';
+    unlockAudio();
+    startTicking();
+    renderTimer();
+  }
+
+  function pauseTimer() {
+    if (timerState !== 'running') return;
+    timerRemainMs = Math.max(0, timerEndAt - Date.now());
+    timerState = 'paused';
+    stopTicking();
+    renderTimer();
+  }
+
+  // 멈췄던 남은 시간부터 이어서 진행
+  function resumeTimer() {
+    if (timerState !== 'paused') return;
+    timerEndAt = Date.now() + timerRemainMs;
+    timerState = 'running';
+    unlockAudio();
+    startTicking();
+    renderTimer();
+  }
+
+  function finishTimer() {
+    timerRemainMs = 0;
+    timerState = 'done';
+    stopTicking();
+    timerDisplay.classList.add('done');
+    playAlarm();
+    renderTimer();
+  }
+
+  function resetTimer() {
+    stopTicking();
+    timerState = 'idle';
+    timerRemainMs = timerSetMs;
+    timerDisplay.classList.remove('done');
+    timerNotice.textContent = '';
+    renderTimer();
+  }
+
+  function canChangeTime() {
+    if (timerState === 'running' || timerState === 'paused') {
+      timerNotice.textContent = '진행 중에는 시간을 바꿀 수 없습니다. 초기화 후 설정해 주세요.';
+      return false;
+    }
+    return true;
+  }
+
+  presetBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!canChangeTime()) return;
+      const min = parseInt(btn.dataset.min, 10);
+      timerSetMs = min * 60 * 1000;
+      timerMinInput.value = min;
+      timerSecInput.value = 0;
+      resetTimer();
+    });
+  });
+
+  document.getElementById('timerApply').addEventListener('click', () => {
+    if (!canChangeTime()) return;
+    let m = parseInt(timerMinInput.value, 10);
+    if (isNaN(m) || m < 0) m = 0;
+    if (m > 180) m = 180;
+    let s = parseInt(timerSecInput.value, 10);
+    if (isNaN(s) || s < 0) s = 0;
+    if (s > 59) s = 59;
+    timerMinInput.value = m;
+    timerSecInput.value = s;
+
+    const total = (m * 60 + s) * 1000;
+    if (total <= 0) {
+      resetTimer();
+      timerNotice.textContent = '1초 이상의 시간을 입력해 주세요.';
+      return;
+    }
+    timerSetMs = total;
+    resetTimer();
+  });
+
+  timerStartBtn.addEventListener('click', startTimer);
+  timerPauseBtn.addEventListener('click', pauseTimer);
+  timerResumeBtn.addEventListener('click', resumeTimer);
+  timerResetBtn.addEventListener('click', resetTimer);
+
+  renderTimer();
+})();
+</script>
+</body>
+</html>
